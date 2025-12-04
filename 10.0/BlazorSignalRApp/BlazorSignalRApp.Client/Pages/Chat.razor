@@ -48,6 +48,8 @@
             InvokeAsync(StateHasChanged);
         });
 
+        DbWatcher.Start();
+
         await hubConnection.StartAsync();
     }
 
@@ -59,8 +61,7 @@
         }
     }
 
-    public bool IsConnected =>
-        hubConnection?.State == HubConnectionState.Connected;
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
 
     public async ValueTask DisposeAsync()
     {
