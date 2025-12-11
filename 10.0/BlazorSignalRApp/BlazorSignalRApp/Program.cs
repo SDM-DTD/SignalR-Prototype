@@ -42,5 +42,5 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(BlazorSignalRApp.Client._Imports).Assembly);
 
 app.MapHub<ChatHub>("/chathub");
-new DbWatcher().Start();
+new DbWatcher(app.Services.GetService<IHubContext<ChatHub>>()).Start();
 app.Run();
