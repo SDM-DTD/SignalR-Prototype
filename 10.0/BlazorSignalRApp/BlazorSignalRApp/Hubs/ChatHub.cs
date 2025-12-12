@@ -12,6 +12,6 @@ public class ChatHub : Hub<IChatHub>
 
     public async Task SendData(int id, TheData theData)
     {
-        await Clients.All.ReceiveData(id, theData);
+        await Clients.All.ReceiveData(theData);
     }
 }

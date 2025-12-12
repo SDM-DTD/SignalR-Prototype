@@ -6,5 +6,5 @@ public interface IChatHub
 {
     Task ReceiveMessage(string user, string message);
 
-    Task ReceiveData(int id, TheData theData);
+    Task ReceiveData(TheData theData);
 }
