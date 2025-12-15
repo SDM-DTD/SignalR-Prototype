@@ -1,9 +1,15 @@
 @page "/chat"
+
 @rendermode InteractiveWebAssembly
+
 @using DTOs
+@using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.SignalR.Client
+
 @implements IAsyncDisposable
+
 @inject NavigationManager Navigation
+@inject TheData TheData
 
 <PageTitle>Chat</PageTitle>
 
@@ -15,24 +21,30 @@
 </ul>
 
 @code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     private HubConnection? hubConnection;
     private List<TheData> messages = [];
-    private string? userInput;
-    private string? messageInput;
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
-            .Build();
-
-        hubConnection.On<TheData>("ReceiveData", theData =>
+        if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
         {
-            messages.Add(theData);
-            InvokeAsync(StateHasChanged);
-        });
+            TheData.Id = id;
 
-        await hubConnection.StartAsync();
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri($"/chathub?runId={id}"))
+                .Build();
+
+            hubConnection.On<TheData>("ReceiveData", theData =>
+            {
+                messages.Add(theData);
+                InvokeAsync(StateHasChanged);
+            });
+
+            await hubConnection.StartAsync();
+        }
     }
 
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
