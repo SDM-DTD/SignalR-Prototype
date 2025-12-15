@@ -47,7 +47,7 @@ public class DbWatcher
     private void GetLatestData()
     {
         using var conn = new SqlConnection(connectionString);
-        using var cmd = new SqlCommand($"SELECT TOP 1 id, [value] FROM dbo.TheData WHERE id={_theData.Id} ORDER BY id DESC", conn);
+        using var cmd = new SqlCommand($"SELECT TOP 1 id, [value] FROM dbo.TheData ORDER BY id DESC", conn);
         conn.Open();
         var latestValue = cmd.ExecuteReader();
 

@@ -29,12 +29,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
-        {
-            TheData.Id = id;
+//        if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
+//        {
+//            TheData.Id = id;
 
             hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri($"/chathub?runId={id}"))
+                .WithUrl(Navigation.ToAbsoluteUri($"/chathub?runId={TheData.Id}"))
                 .Build();
 
             hubConnection.On<TheData>("ReceiveData", theData =>
@@ -44,7 +44,7 @@
             });
 
             await hubConnection.StartAsync();
-        }
+//        }
     }
 
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
