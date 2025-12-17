@@ -10,12 +10,12 @@ public class DbWatcher
     private const string connectionString = "Data Source=DTD-LT71\\MSSQLSERVER02;DATABASE=SignalR-Prototype;Integrated Security=True;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=10";
     //private const string connectionString = "SERVER=.\\MSSQLSERVER2017;DATABASE=SignalR-Prototype;Integrated Security=True;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=true;Connection Timeout=10";
     private readonly IHubContext<ChatHub>? _hub;
-    private TheData _theData;
+    private TheData? theData;
 
     public DbWatcher(IHubContext<ChatHub>? hub, TheData theData)
     {
         _hub = hub;
-        _theData = theData;
+        this.theData = theData;
     }
 
     public void Start()
@@ -40,7 +40,7 @@ public class DbWatcher
     {
         Console.WriteLine($"Database change detected: {e.Type}, {e.Info}, {e.Source}");
         GetLatestData();
-        _hub.Clients.All.SendAsync("ReceiveData", _theData);
+        _hub.Clients.All.SendAsync("ReceiveData", theData);
         RegisterNotification();
     }
 
@@ -53,8 +53,8 @@ public class DbWatcher
 
         if (latestValue.Read() && latestValue.HasRows)
         {            
-            _theData.Id = (int)latestValue.GetInt32(0);
-            _theData.Value = latestValue.GetString(1);            
+            theData.Id = (int)latestValue.GetInt32(0);
+            theData.Value = latestValue.GetString(1);            
         }
     }
 }

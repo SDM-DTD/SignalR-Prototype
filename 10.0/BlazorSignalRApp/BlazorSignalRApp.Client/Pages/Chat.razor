@@ -2,9 +2,7 @@
 
 @rendermode InteractiveWebAssembly
 
-@using System.Diagnostics
 @using DTOs
-@using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.SignalR.Client
 
 @implements IAsyncDisposable
@@ -22,8 +20,8 @@
 </ul>
 
 @code {
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
+//    [CascadingParameter]
+//    private HttpContext? HttpContext { get; set; }
 
     private HubConnection? hubConnection;
     private List<TheData> messages = [];
@@ -36,16 +34,12 @@
 
         hubConnection.On<TheData>("ReceiveData", theData =>
         {
-            if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
-            {
-                TheData.Id = id;
-                Console.WriteLine($"The Data {theData.Id}: {theData.Value}");
+            Console.WriteLine($"The Data {theData.Id}: {theData.Value}");
 
-                //if (theData.Id == id)
-                {
-                    messages.Add(theData);
-                    InvokeAsync(StateHasChanged);
-                }
+            //if (theData.Id == id)
+            {
+                messages.Add(theData);
+                InvokeAsync(StateHasChanged);
             }
         });
 
