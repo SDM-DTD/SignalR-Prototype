@@ -2,6 +2,7 @@
 
 @rendermode InteractiveWebAssembly
 
+@using System.Diagnostics
 @using DTOs
 @using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.SignalR.Client
@@ -29,22 +30,26 @@
 
     protected override async Task OnInitializedAsync()
     {
-//        if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
-//        {
-//            TheData.Id = id;
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri($"/chathub"))
+            .Build();
 
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri($"/chathub?runId={TheData.Id}"))
-                .Build();
-
-            hubConnection.On<TheData>("ReceiveData", theData =>
+        hubConnection.On<TheData>("ReceiveData", theData =>
+        {
+            if (int.TryParse(HttpContext?.Request.Query["runId"], out var id))
             {
-                messages.Add(theData);
-                InvokeAsync(StateHasChanged);
-            });
+                TheData.Id = id;
+                Console.WriteLine($"The Data {theData.Id}: {theData.Value}");
 
-            await hubConnection.StartAsync();
-//        }
+                //if (theData.Id == id)
+                {
+                    messages.Add(theData);
+                    InvokeAsync(StateHasChanged);
+                }
+            }
+        });
+
+        await hubConnection.StartAsync();
     }
 
     public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;

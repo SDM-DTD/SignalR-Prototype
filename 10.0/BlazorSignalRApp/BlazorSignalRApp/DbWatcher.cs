@@ -1,14 +1,14 @@
 using BlazorSignalRApp.Hubs;
 using DTOs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Data.SqlClient;
 
 namespace BlazorSignalRApp.Client;
 
 public class DbWatcher
 {
-    private const string connectionString = "SERVER=.\\MSSQLSERVER2017;DATABASE=SignalR-Prototype;Integrated Security=True;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=true;Connection Timeout=10";
+    private const string connectionString = "Data Source=DTD-LT71\\MSSQLSERVER02;DATABASE=SignalR-Prototype;Integrated Security=True;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=10";
+    //private const string connectionString = "SERVER=.\\MSSQLSERVER2017;DATABASE=SignalR-Prototype;Integrated Security=True;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=true;Connection Timeout=10";
     private readonly IHubContext<ChatHub>? _hub;
     private TheData _theData;
 
@@ -23,7 +23,7 @@ public class DbWatcher
         SqlDependency.Start(connectionString);
         RegisterNotification();
         Console.WriteLine("Listening for changes. Press Enter to exit...");
-        //      SqlDependency.Stop(connectionString);
+//        SqlDependency.Stop(connectionString);
     }
 
     public void RegisterNotification()
@@ -33,7 +33,7 @@ public class DbWatcher
         var dependency = new SqlDependency(cmd);
         dependency.OnChange += OnDatabaseChange;
         conn.Open();
-        cmd.ExecuteReader(); // Start listening
+        cmd.ExecuteReader();
     }
 
     private void OnDatabaseChange(object sender, SqlNotificationEventArgs e)
@@ -47,7 +47,7 @@ public class DbWatcher
     private void GetLatestData()
     {
         using var conn = new SqlConnection(connectionString);
-        using var cmd = new SqlCommand($"SELECT TOP 1 id, [value] FROM dbo.TheData ORDER BY id DESC", conn);
+        using var cmd = new SqlCommand($"SELECT TOP 1 id, [value] FROM dbo.TheData ORDER BY Id DESC", conn);
         conn.Open();
         var latestValue = cmd.ExecuteReader();
 
