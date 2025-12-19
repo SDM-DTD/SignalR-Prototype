@@ -10,12 +10,13 @@ public class DbWatcher
     private const string connectionString = "Data Source=DTD-LT71\\MSSQLSERVER02;DATABASE=SignalR-Prototype;Integrated Security=True;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=true;Connection Timeout=10";
     //private const string connectionString = "SERVER=.\\MSSQLSERVER2017;DATABASE=SignalR-Prototype;Integrated Security=True;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=true;Connection Timeout=10";
     private readonly IHubContext<ChatHub>? _hub;
+    private readonly ClientManager _clientManager;
     private TheData? theData;
 
-    public DbWatcher(IHubContext<ChatHub>? hub, TheData theData)
+    public DbWatcher(IHubContext<ChatHub>? hub, ClientManager clientManager)
     {
         _hub = hub;
-        this.theData = theData;
+        _clientManager = clientManager;
     }
 
     public void Start()
@@ -46,15 +47,20 @@ public class DbWatcher
 
     private void GetLatestData()
     {
+        //var id = _clientManager.GetConnectionId()
+        id = 242;
         using var conn = new SqlConnection(connectionString);
-        using var cmd = new SqlCommand($"SELECT TOP 1 id, [value] FROM dbo.TheData ORDER BY Id DESC", conn);
+        using var cmd = new SqlCommand($"SELECT TOP 1 [id], [Value] FROM [SignalR-Prototype].[dbo].[TheData] WHERE [id]={id} ORDER BY [Id] DESC", conn);
         conn.Open();
         var latestValue = cmd.ExecuteReader();
 
         if (latestValue.Read() && latestValue.HasRows)
-        {            
-            theData.Id = (int)latestValue.GetInt32(0);
-            theData.Value = latestValue.GetString(1);            
+        {
+            theData = new TheData
+            {
+                Id = (int)latestValue.GetInt32(0),
+                Value = latestValue.GetString(1)
+            };
         }
     }
 }
