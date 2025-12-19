@@ -1,3 +1,4 @@
+using BlazorSignalRApp;
 using BlazorSignalRApp.Client;
 using BlazorSignalRApp.Components;
 using BlazorSignalRApp.Hubs;
@@ -15,7 +16,7 @@ builder.Services.AddResponseCompression(opts =>
 });
 
 builder.Services.AddScoped<ChatHub>();
-builder.Services.AddScoped<TheData>();
+builder.Services.AddScoped<ClientManager>();
 var app = builder.Build();
 app.UseResponseCompression();
 
@@ -39,5 +40,12 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(BlazorSignalRApp.Client._Imports).Assembly);
 
 app.MapHub<ChatHub>("/chathub");
-new DbWatcher(app.Services.GetService<IHubContext<ChatHub>>(), new TheData()).Start();
+
+using (var scope = app.Services.CreateScope())
+{
+    var clientManager = scope.ServiceProvider.GetRequiredService<ClientManager>();
+    new DbWatcher(app.Services.GetService<IHubContext<ChatHub>>(), clientManager).Start();
+}
+
+
 app.Run();
