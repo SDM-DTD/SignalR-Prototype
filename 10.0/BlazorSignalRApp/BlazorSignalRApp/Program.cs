@@ -1,8 +1,6 @@
 using BlazorSignalRApp;
-using BlazorSignalRApp.Client;
 using BlazorSignalRApp.Components;
 using BlazorSignalRApp.Hubs;
-using DTOs;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,8 +13,19 @@ builder.Services.AddResponseCompression(opts =>
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(["application/octet-stream"]);
 });
 
-builder.Services.AddScoped<ChatHub>();
-builder.Services.AddScoped<ClientManager>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder
+            .WithOrigins("https://localhost:7037")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+builder.Services.AddSingleton<ChatHub>();
 var app = builder.Build();
 app.UseResponseCompression();
 
@@ -34,18 +43,13 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.MapStaticAssets();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BlazorSignalRApp.Client._Imports).Assembly);
-
+app.MapRazorComponents<App>();
+app.UseCors("CorsPolicy");
 app.MapHub<ChatHub>("/chathub");
 
 using (var scope = app.Services.CreateScope())
 {
-    var clientManager = scope.ServiceProvider.GetRequiredService<ClientManager>();
-    new DbWatcher(app.Services.GetService<IHubContext<ChatHub>>(), clientManager).Start();
+    new DbWatcher(app.Services.GetService<IHubContext<ChatHub>>()).Start();
 }
-
 
 app.Run();

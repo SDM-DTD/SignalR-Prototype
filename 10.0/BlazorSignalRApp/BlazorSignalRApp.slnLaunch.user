@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "BlazorSignalRApp\\BlazorSignalRApp.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "PwaClient\\PwaClient.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

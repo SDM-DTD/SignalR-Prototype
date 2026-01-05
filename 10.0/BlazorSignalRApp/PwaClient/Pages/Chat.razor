@@ -1,0 +1,52 @@
+@page "/chat"
+
+@using DTOs
+@using Microsoft.AspNetCore.SignalR.Client
+
+<PageTitle>Chat</PageTitle>
+
+<ul id="messagesList">
+    @foreach (var message in _messages)
+    {
+        <li>@message.Id: @message.Value</li>
+    }
+</ul>
+
+@code {
+     private readonly List<TheData> _messages = [];
+     private HubConnection? _hubConnection;
+
+     [Parameter]
+     [SupplyParameterFromQuery]
+     public int? RunId { get; set; }
+
+     protected override async Task OnInitializedAsync()
+     {
+         _messages.Add(new TheData { RunId = 124, Value = "Test" });
+        
+         _hubConnection = new HubConnectionBuilder()
+          .WithUrl("https://localhost:44320/chathub")
+          .Build();
+
+         if (_hubConnection.State == HubConnectionState.Disconnected)
+         {
+             await _hubConnection.StartAsync();
+         }
+
+         _hubConnection.On<TheData>("ReceiveData", theData =>
+         {
+             _messages.Add(theData);
+             InvokeAsync(StateHasChanged);
+         });
+
+         await Subscribe();
+     }
+
+     private async Task Subscribe()
+     {
+         if (_hubConnection != null)
+         {
+             await _hubConnection.InvokeAsync("Subscribe", RunId);
+         }
+     }
+}

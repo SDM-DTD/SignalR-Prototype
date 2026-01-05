@@ -1,29 +1,37 @@
-using System.ClientModel.Primitives;
 using DTOs;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 
 namespace BlazorSignalRApp.Hubs;
 
-public class ChatHub(ClientManager clientManagaer) : Hub<IChatHub>
+public class ChatHub : Hub
 {
-    public async Task SendData(int id, TheData theData)
+    private static readonly ConcurrentDictionary<string, string> subscriptions = new();
+
+    public override Task OnDisconnectedAsync(Exception? exception)
     {
-        await Clients.All.ReceiveData(theData);
+        subscriptions.TryRemove(Context.ConnectionId, out _);
+
+        return base.OnDisconnectedAsync(exception);
     }
 
-    public void SetClientId(int id, string connectionId)
+    public Task Subscribe(int runId)
     {
-        clientManagaer.AddClient(id, connectionId);
+        if (runId > 0)
+        {
+            subscriptions[Context.ConnectionId] = runId.ToString();
+        }
+
+        return Task.CompletedTask;
     }
 
-    public int GetId()
+    public static async Task NotifyClientsAsync(IHubContext<ChatHub> hub, string keyId, TheData theData)
     {
-        return clientManagaer.GetConnectionId(Context.ConnectionId) ?? 0;
-    }
+        var clientConnections = subscriptions.Where(x => x.Value == keyId).Select(x => x.Key).ToList();
 
-    public override async Task OnConnectedAsync()
-    {
-        clientManagaer.AddClient(GetId(), Context.ConnectionId);
-        await base.OnConnectedAsync();
+        foreach (var clientConnection in clientConnections)
+        {
+            await hub.Clients.Client(clientConnection).SendAsync("ReceiveData", theData);
+        }
     }
 }
