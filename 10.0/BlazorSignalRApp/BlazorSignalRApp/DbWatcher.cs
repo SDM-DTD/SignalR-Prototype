@@ -22,6 +22,7 @@ public class DbWatcher(IHubContext<ChatHub>? hub)
     {
         using var conn = new SqlConnection(connectionString);
         using var cmd = new SqlCommand("SELECT [Id] FROM dbo.TheData", conn);
+        //using var cmd = new SqlCommand("SELECT MAX([Id]) FROM dbo.TheData", conn);
         var dependency = new SqlDependency(cmd);
         dependency.OnChange += OnDatabaseChange;
         conn.Open();
