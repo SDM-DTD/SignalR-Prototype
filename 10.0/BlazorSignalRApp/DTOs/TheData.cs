@@ -6,5 +6,5 @@ public class TheData
 
     public int RunId { get; set; }
 
-    public string Value { get; set; }
+    public string Value { get; set; } = string.Empty;
 }

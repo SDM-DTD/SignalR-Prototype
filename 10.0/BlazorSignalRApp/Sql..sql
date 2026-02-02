@@ -2,13 +2,21 @@ DELETE [SignalR-Prototype].[dbo].[TheData]
 
 SELECT top 1 * FROM [SignalR-Prototype].[dbo].[TheData] order by id desc
 
-INSERT INTO [SignalR-Prototype].[dbo].[TheData] ([Value]) VALUES('Ex-Cellent')
+SELECT * FROM [SignalR-Prototype].[dbo].[TheData]
 
 
+INSERT INTO [SignalR-Prototype].[dbo].[TheData] ([Value], [RunId]) VALUES('Happy', 999)
+GO
+WAITFOR DELAY '00:00:01';
+INSERT INTO [SignalR-Prototype].[dbo].[TheData] ([Value], [RunId]) VALUES('Days', 77)
+GO
+WAITFOR DELAY '00:00:01';
+INSERT INTO [SignalR-Prototype].[dbo].[TheData] ([Value], [RunId]) VALUES('are here.', 7)
+GO
 
 
+SELECT MAX([Id]) FROM dbo.TheData
 
-SELECT TOP 1 [id], [Value] FROM [SignalR-Prototype].[dbo].[TheData] WHERE [id]=242 ORDER BY [Id] DESC
 
 --=======================================================================================================================================
 USE master;
